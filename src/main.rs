@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get},
+    routing::{get, post},
     Router,
     Json,
     Extension,
@@ -13,9 +13,17 @@ use tower_http::trace::TraceLayer;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
+mod cornucopia;
+use cornucopia::queries::users::{get_all_users, insert_user};
+
 #[derive(Serialize, Deserialize)]
 struct User {
     id: i32,
+    name: String,
+}
+
+#[derive(Deserialize)]
+struct AddUser {
     name: String,
 }
 
@@ -57,36 +65,24 @@ async fn main() {
 }
 
 async fn get_users(Extension(client): Extension<Arc<tokio_postgres::Client>>) -> Json<Vec<User>> {
-    let rows = client
-        .query("SELECT * FROM users", &[])
-        .await
-        .expect("Failed to execute query");
-    let users = rows
-        .into_iter()
-        .map(|row| User {
-            id: row.get("id"),
-            name: row.get("name"),
-        })
-        .collect();
+    let mut stmt = get_all_users();
+    let rows = stmt.bind(&*client).all().await.expect("Failed to execute query");
+    let users = rows.iter().map(|row| User {
+        id: row.id,
+        name: row.name.clone(),
+    }).collect();
     Json(users)
-}
-
-#[derive(Deserialize)]
-struct AddUser {
-    name: String,
 }
 
 async fn add_user(
     Extension(client): Extension<Arc<tokio_postgres::Client>>,
     Json(payload): Json<AddUser>,
 ) -> Json<User> {
-    let row = client
-        .query_one("INSERT INTO users (name) VALUES ($1) RETURNING id, name", &[&payload.name])
-        .await
-        .expect("Failed to execute query");
+    let mut stmt = insert_user();
+    let row = stmt.bind(&*client, &payload.name).one().await.expect("Failed to execute query");
     let user = User {
-        id: row.get("id"),
-        name: row.get("name"),
+        id: row.id,
+        name: row.name.clone(),
     };
     Json(user)
 }

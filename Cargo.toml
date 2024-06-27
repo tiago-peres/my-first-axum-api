@@ -4,14 +4,44 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# Axum web framework
 axum = "0.6"
-tokio = { version = "1", features = ["full"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-tokio-postgres = "0.7"
-cornucopia = "0.3"
+
+# Environment variables
 dotenv = "0.15"
+
+# Tower (used for middleware and routing)
 tower = "0.4"
 tower-http = { version = "0.3", features = ["trace"] }
+
+# Tracing for logging
 tracing-subscriber = "0.3"
 tracing = "0.1"
+
+# Postgres types with derive feature
+postgres-types = { version = "*", features = ["derive"] }
+
+# Asynchronous runtime and utilities
+tokio = { version = "*", features = ["full"] }
+futures = "*"
+
+# Cornucopia for async Postgres interactions
+cornucopia_async = { version = "*", features = ["with-serde_json-1"] }
+
+# Async Postgres driver
+tokio-postgres = { version = "*", features = [
+    "with-serde_json-1",
+    "with-time-0_3",
+    "with-uuid-1",
+    "with-eui48-1"
+]}
+
+# Serialization and deserialization
+serde = { version = "*", features = ["derive"] }
+serde_json = "*"
+
+# Extra types
+time = "*"
+uuid = "*"
+eui48 = "*"
+rust_decimal = { version = "*", features = ["db-postgres"] }
