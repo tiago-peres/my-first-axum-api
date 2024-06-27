@@ -31,7 +31,6 @@ struct AddUser {
 
 #[derive(Deserialize)]
 struct EditUser {
-    id: i32,
     name: String,
 }
 
@@ -124,10 +123,11 @@ async fn delete_user(
 
 async fn edit_user(
     Extension(client): Extension<Arc<tokio_postgres::Client>>,
+    axum::extract::Path(id): axum::extract::Path<i32>,
     Json(payload): Json<EditUser>,
 ) -> Json<User> {
     let mut stmt = update_user();
-    let row = stmt.bind(&*client, &payload.name, &payload.id).one().await.expect("Failed to execute query");
+    let row = stmt.bind(&*client, &payload.name, &id).one().await.expect("Failed to execute query");
     let user = User {
         id: row.id,
         name: row.name.clone(),

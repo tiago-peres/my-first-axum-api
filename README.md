@@ -52,7 +52,7 @@ curl http://localhost:8080/users/1
 #### Update a User
 
 ```sh
-curl -X PUT http://localhost:8080/users/1 -H "Content-Type: application/json" -d '{"id": 1, "name": "Jane Doe"}'
+curl -X PUT http://localhost:8080/users/1 -H "Content-Type: application/json" -d '{"name": "Jane Doe"}'
 ```
 
 #### Delete a User
