@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post},
+    routing::{get, post, put, delete},
     Router,
     Json,
     Extension,
@@ -14,7 +14,9 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
 mod cornucopia;
-use cornucopia::queries::users::{get_all_users, insert_user};
+use cornucopia::queries::users::{
+    get_all_users, insert_user, get_user, delete_user as db_delete_user, update_user,
+};
 
 #[derive(Serialize, Deserialize)]
 struct User {
@@ -24,6 +26,12 @@ struct User {
 
 #[derive(Deserialize)]
 struct AddUser {
+    name: String,
+}
+
+#[derive(Deserialize)]
+struct EditUser {
+    id: i32,
     name: String,
 }
 
@@ -52,6 +60,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/users", get(get_users).post(add_user))
+        .route("/users/:id", get(get_single_user).put(edit_user).delete(delete_user))
         .layer(Extension(client))
         .layer(TraceLayer::new_for_http());
 
@@ -80,6 +89,45 @@ async fn add_user(
 ) -> Json<User> {
     let mut stmt = insert_user();
     let row = stmt.bind(&*client, &payload.name).one().await.expect("Failed to execute query");
+    let user = User {
+        id: row.id,
+        name: row.name.clone(),
+    };
+    Json(user)
+}
+
+async fn get_single_user(
+    Extension(client): Extension<Arc<tokio_postgres::Client>>,
+    axum::extract::Path(id): axum::extract::Path<i32>,
+) -> Json<User> {
+    let mut stmt = get_user();
+    let row = stmt.bind(&*client, &id).one().await.expect("Failed to execute query");
+    let user = User {
+        id: row.id,
+        name: row.name.clone(),
+    };
+    Json(user)
+}
+
+async fn delete_user(
+    Extension(client): Extension<Arc<tokio_postgres::Client>>,
+    axum::extract::Path(id): axum::extract::Path<i32>,
+) -> Json<User> {
+    let mut stmt = db_delete_user();
+    let row = stmt.bind(&*client, &id).one().await.expect("Failed to execute query");
+    let user = User {
+        id: row.id,
+        name: row.name.clone(),
+    };
+    Json(user)
+}
+
+async fn edit_user(
+    Extension(client): Extension<Arc<tokio_postgres::Client>>,
+    Json(payload): Json<EditUser>,
+) -> Json<User> {
+    let mut stmt = update_user();
+    let row = stmt.bind(&*client, &payload.name, &payload.id).one().await.expect("Failed to execute query");
     let user = User {
         id: row.id,
         name: row.name.clone(),

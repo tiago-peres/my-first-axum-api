@@ -17,9 +17,9 @@ git clone git@github.com:tiago-peres/my-first-rust-api.git
 cd my-first-rust-api
 ```
 
-### 2. Start the Services with Docker Compose
+### 2. Build and Start All Services
 
-Use Docker Compose to build and start the services:
+Now, build and start all services using Docker Compose:
 
 ```sh
 docker-compose up --build
@@ -43,15 +43,65 @@ curl -X POST http://localhost:8080/users -H "Content-Type: application/json" -d 
 curl http://localhost:8080/users
 ```
 
+#### Get a Specific User
+
+```sh
+curl http://localhost:8080/users/1
+````
+
+#### Update a User
+
+```sh
+curl -X PUT http://localhost:8080/users/1 -H "Content-Type: application/json" -d '{"id": 1, "name": "Jane Doe"}'
+```
+
+#### Delete a User
+
+```sh
+curl -X DELETE http://localhost:8080/users/1
+```
+
+## 4. Making Changes to Database Queries
+
+If you need to make changes to your database queries or add new ones, follow these steps:
+
+1. **Start the Database Service**
+
+   Use Docker Compose to start the PostgreSQL database service:
+
+   ```sh
+   docker-compose up -d db
+   ```
+
+2. **Generate Cornucopia File**
+
+   Open Git Bash and run the Cornucopia CLI against the database to generate the new query files:
+
+   ```sh
+   cornucopia live postgres://postgres:password@localhost:5432/mydb
+   ```
+
+3. **Shut Down the Database Service**
+
+   Shut down the database service:
+
+   ```sh
+   docker-compose down
+   ```
+
 ## Project Structure
 
 ```
 my-first-rust-api/
+├── .gitignore
 ├── Cargo.toml
-├── Dockerfile
 ├── docker-compose.yml
+├── Dockerfile
 ├── init.sql
+├── README.md
+└── queries/
+    └── users.sql
 └── src/
     └── main.rs
+    └── cornucopia.rs
 ```
-
