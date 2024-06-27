@@ -1,10 +1,10 @@
-# My First Rust API
+# My First Axum API
 
 This is a simple API built with Rust using the Axum framework, connected to a PostgreSQL database.
 
 ## Prerequisites
 
-Before you start, ensure you have Docker and Docker Compose installed on your system.
+Before you start, ensure you have Docker, Docker Compose and Rust installed on your system.
 
 ## Getting Started
 
@@ -13,8 +13,8 @@ Before you start, ensure you have Docker and Docker Compose installed on your sy
 First, clone the repository to your local machine:
 
 ```sh
-git clone git@github.com:tiago-peres/my-first-rust-api.git
-cd my-first-rust-api
+git clone git@github.com:tiago-peres/my-first-axum-api.git
+cd my-first-axum-api
 ```
 
 ### 2. Build and Start All Services
